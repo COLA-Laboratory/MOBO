@@ -5,8 +5,10 @@ Example of how to use the current version of the library.
 from Kernels.JAX.rbf import RBF as RBFj
 from Models.JAX.GPregression import GPregression as JGP
 from Likelihoods.JAX.chol import Likelihood as JL
+from Acquisitions.JAX.EI import AcquisitionEI
 
 from ModelOptimizers.lbfgsb import lbfgsb
+from jax import value_and_grad
 
 import numpy as np
 
@@ -28,12 +30,12 @@ def rastrigin(x):
 if __name__ == "__main__":
     import time
     np.random.seed(0)
-    dim = 10
+    dim = 2
     f = rastrigin
     X = np.random.uniform(-5, 5, (100, dim))
     y = np.array([f(xi) for xi in X]).reshape(-1, 1)
 
-    Xtest = np.random.uniform(-5, 5, (100, dim))
+    Xtest = np.random.uniform(-5, 5, (1, dim))
     ytest = np.array([f(xi) for xi in Xtest]).reshape(-1, 1)
 
     jax_kern = RBFj(X.shape, ARD=True)
@@ -46,6 +48,13 @@ if __name__ == "__main__":
     print("jax:", time.time() - start)
     print(jax_model.log_likelihood)
 
-    jax_mean, jax_variance = jax_model.predict(Xtest, full_cov=True)
-    print("jax:", np.mean(abs(jax_mean - ytest)))
+    acquisition = AcquisitionEI(jax_model, np.min(y))
+
+    unknown_point = np.random.uniform(-5, 5, (1, dim))
+    value, grad = value_and_grad(acquisition.function, argnums=0)(unknown_point)
+
+    print(value, grad)
+
+    #jax_mean, jax_variance = jax_model.predict(Xtest, full_cov=False)
+    #print("jax:", np.mean(abs(jax_mean - ytest)))
 

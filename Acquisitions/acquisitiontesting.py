@@ -81,9 +81,9 @@ if __name__ == "__main__":
     from jax import value_and_grad, vjp
     import jax.numpy as jnp
     np.random.seed(1)
-    dim = 2
+    dim = 1
     f = sphere
-    X = np.random.uniform(-5, 5, (50, dim))
+    X = np.random.uniform(-5, 5, (5, dim))
     y = np.array([f(xi) for xi in X]).reshape(-1, 1)
 
     #plt.plot(X, y, 'o')
@@ -101,21 +101,19 @@ if __name__ == "__main__":
     Xtest = np.linspace(-5, 5, 100).reshape(-1, 1)
     Xtest1 = np.random.uniform(-5, 5, (1, dim))
 
-    #eis = np.array([jax_ei.function(xi.reshape(-1, 1)) for xi in Xtest]).flatten()
+    eis = np.array([jax_ei.value_and_gradient(xi.reshape(-1, 1))[0] for xi in Xtest]).flatten()
+
     #plt.plot(Xtest.flatten(), eis)
-    print(Xtest1.shape)
-    print(jax_ei.value_and_gradient(Xtest1))
+
+    #print(jax_ei.value_and_gradient(Xtest1))
 
     gpy_kernel = RBFg(input_dim=dim, ARD=False)
     gpy_model = gpy(X, y, gpy_kernel)
-    #gpy_model.optimize()
+    gpy_model.optimize()
 
     gpy_ei = GPyEI(gpy_model, min(y))
-    #eis = np.array([gpy_ei._compute_acq(xi.reshape(-1, 1)) for xi in Xtest]).flatten()
+    eis = np.array([gpy_ei._compute_acq(xi.reshape(-1, 1)) for xi in Xtest]).flatten()
 
-    print(gpy_ei._compute_acq_withGradients(Xtest1))
-
-    #plt.plot(Xtest.flatten(), eis)
-    #plt.legend(["jax", "gpy"])
-    #plt.show()
-
+    plt.plot(Xtest.flatten(), eis)
+    plt.legend(["jax", "gpy"])
+    plt.show()

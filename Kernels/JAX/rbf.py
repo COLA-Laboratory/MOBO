@@ -57,8 +57,8 @@ class RBF:
 
     @partial(jit, static_argnums=(0,))
     def NARDf(self, X, params):
-        r = ieuclidean_distance(X, self.diagonal) / params["lengthscale"]
-        return params["variance"] * jnp.exp(-0.5 * r ** 2)
+        r = ieuclidean_distance_s(X, self.diagonal) / params["lengthscale"]
+        return params["variance"] * jnp.exp(-0.5 * r)
 
     @partial(jit, static_argnums=(0,))
     def ARDf(self, X, params):
