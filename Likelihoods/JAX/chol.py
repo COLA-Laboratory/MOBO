@@ -45,7 +45,6 @@ class Likelihood:
 
         self.L = cholesky(K, lower=True)
         self.alpha = solve_triangular(self.L.T, solve_triangular(self.L, self.model.y, lower=True))
-        #self.value = stop_gradient(self.log_likelihood(self.model.parameters))
 
     @partial(jit, static_argnums=(0,))
     def log_likelihood(self, params):
@@ -84,6 +83,10 @@ class Likelihood:
         mu = jnp.dot(Kx.T, self.alpha)
 
         Kxx = self.model.kernel.cov(Xnew, Xnew)
+
         tmp = solve_triangular(self.L, Kx, lower=True)
+
         var = Kxx - jnp.dot(tmp.T, tmp) + jnp.eye(Xnew.shape[0]) * self.model.variance
+
         return mu, var
+

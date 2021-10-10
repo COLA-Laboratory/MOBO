@@ -1,5 +1,6 @@
 import numpy as np
 from jax.lax import stop_gradient
+import jax.numpy as jnp
 import jax
 
 
@@ -42,4 +43,4 @@ class GPregression:
                 return mu, var
             else:
                 mu, var = self.likelihood.predict(Xnew)
-                return mu, np.diag(var)
+                return mu, jnp.diag(var)
