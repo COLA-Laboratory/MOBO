@@ -3,13 +3,13 @@ import numpy as np
 
 
 class lbfgsb:
-    def __init__(self, model):
+    def __init__(self, model, maxfun=1000):
         self.lengths = [len(model.parameters[pi]) for pi in model.parameters]
         self.x0 = model.likelihood.finv(np.concatenate([model.parameters[pi] for pi in model.parameters]))
         self.param_words = list(model.parameters.keys())
         self.model = model
         self.function = model.likelihood.objective_and_grad
-        self.maxfun = 100
+        self.maxfun = maxfun
 
     def to_dict(self, x):
         c_idx = 0

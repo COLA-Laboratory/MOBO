@@ -1,6 +1,5 @@
 from scipy import optimize
 from pyDOE import lhs
-import numpy as np
 
 
 class AOlbfgs:
@@ -10,7 +9,7 @@ class AOlbfgs:
         self.ub = ub
         self.dim = acquisition.model.X.shape[1]
 
-    def opt(self, restarts=1):
+    def opt(self, restarts=1, verbose=False):
 
         samples = []
         eis = []
@@ -22,6 +21,9 @@ class AOlbfgs:
                                          bounds=[[self.lb[i], self.ub[i]] for i in range(len(self.lb))])
             samples.append(res[0])
             eis.append(res[1])
+
+            if verbose:
+                print(res)
 
         return samples[eis.index(min(eis))], min(eis)
 
