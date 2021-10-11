@@ -75,7 +75,8 @@ class Likelihood:
         for gi in gradients:
             gradients[gi] = jnp.nan_to_num(self.gradfactor(params[gi], gradients[gi]))
 
-        return jnp.nan_to_num(value, jnp.inf), gradients
+        if jnp.isnan(value): value = np.inf
+        return value, gradients
 
     @partial(jit, static_argnums=(0,))
     def predict(self, Xnew):
