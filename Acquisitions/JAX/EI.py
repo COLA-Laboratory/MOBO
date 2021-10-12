@@ -1,5 +1,5 @@
 """
-Negative Expected Improvement (for minimization, take negative for maximization)
+Negative Expected Improvement (for minimization, negative for maximization)
 """
 import jax.numpy as jnp
 from jax import jit
