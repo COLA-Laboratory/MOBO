@@ -10,7 +10,7 @@ import numpy as np
 
 
 class AcquisitionEI:
-    def __init__(self, jax_model, fmin, jitter=0.0):
+    def __init__(self, jax_model, fmin, jitter=0.001):
         self.model = jax_model
         self.jitter = jitter
         self.fmin = fmin
@@ -25,7 +25,7 @@ class AcquisitionEI:
         mean, var = self.model.predict(x)
 
         s = jnp.sqrt(var)
-        u = (self.fmin - mean + self.jitter) / s
+        u = (self.fmin - mean - self.jitter) / s
         phi = jnp.exp(-0.5 * u ** 2) / jnp.sqrt(2 * jnp.pi)
         Phi = 0.5 * erfc(-u / jnp.sqrt(2))
 
