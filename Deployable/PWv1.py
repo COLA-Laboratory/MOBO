@@ -9,8 +9,9 @@ import numpy as np
 from Kernels.JAX.rbf import RBF
 from Likelihoods.JAX.chol import Likelihood
 from Models.JAX.GPregression import GPregression
-from Acquisitions.JAX.EI import AcquisitionEI
 from ModelOptimizers.lbfgsb import lbfgsb
+
+from Acquisitions.JAX.EI import AcquisitionEI
 from AcquisitionOptimizers.lbfgsb import AOlbfgs
 
 
@@ -55,13 +56,13 @@ class BO:
             # call likelihood.evaluate() -> if you do not wish to train the model
             model_optimizer = lbfgsb(model)
             model_optimizer.opt()
-            print(model.log_likelihood)
+
+            print(model.variance)
 
             # 2. Select next sample point
             acquisition = AcquisitionEI(model, min(y))
             acquisition_optimizer = AOlbfgs(acquisition, self.lb, self.ub)
-            sample, ei_val = acquisition_optimizer.opt(restarts=10)
-
+            sample, ei_val = acquisition_optimizer.opt(restarts=10, verbose=True)
 
             # 3. Evaluate Sample and append to the dataset
             s_eval = self.function(sample)
@@ -69,4 +70,10 @@ class BO:
             y = np.concatenate([y, np.array([[s_eval]])], axis=0)
 
         print("final min value:", min(y))
-        return x, y
+        process = [self.x_init[np.where(self.y_init == min(y))]]
+        process.extend(x[len(self.x_init):])
+
+        y_process = [min(self.y_init)]
+        y_process.extend(y[len(self.y_init):])
+
+        return process, y_process

@@ -10,12 +10,11 @@ import numpy as np
 
 
 class AcquisitionEI:
-    def __init__(self, jax_model, fmin, jitter=0.01):
+    def __init__(self, jax_model, fmin, jitter=0.0):
         self.model = jax_model
         self.jitter = jitter
         self.fmin = fmin
 
-    #@partial(jit, static_argnums=(0,))
     def value_and_gradient(self, x):
         x = x.reshape(1, len(x))
         v, g = value_and_grad(self.function, argnums=0)(x)
@@ -26,7 +25,7 @@ class AcquisitionEI:
         mean, var = self.model.predict(x)
 
         s = jnp.sqrt(var)
-        u = (self.fmin - mean) / s
+        u = (self.fmin - mean + self.jitter) / s
         phi = jnp.exp(-0.5 * u ** 2) / jnp.sqrt(2 * jnp.pi)
         Phi = 0.5 * erfc(-u / jnp.sqrt(2))
 

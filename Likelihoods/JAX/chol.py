@@ -73,7 +73,7 @@ class Likelihood:
         value, gradients = value_and_grad(self.objective, argnums=0)(params)
 
         for gi in gradients:
-            gradients[gi] = jnp.nan_to_num(self.gradfactor(params[gi], gradients[gi]))
+            gradients[gi] = self.gradfactor(params[gi], gradients[gi])
 
         if jnp.isnan(value): value = np.inf
         return value, gradients
