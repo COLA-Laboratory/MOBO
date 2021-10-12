@@ -49,7 +49,8 @@ class Likelihood:
     @partial(jit, static_argnums=(0,))
     def log_likelihood(self, params):
         self.model.set_parameters(params)
-        kx = self.model.kernel.function(self.model.X, params) + jnp.eye(self.N) * (params["noise"] + 1e-8)
+        kx = self.model.kernel.function(self.model.X, params)
+        kx += jnp.eye(self.N) * (params["noise"] + 1e-8)
         L = cholesky(kx, lower=True)
 
         alpha = solve_triangular(L.T, solve_triangular(L, self.model.y, lower=True))
@@ -66,7 +67,6 @@ class Likelihood:
         return -1. * self.log_likelihood(params)
 
     def objective_and_grad(self, params):
-
         for pi in params:
             params[pi] = self.fi(params[pi])
 
@@ -75,7 +75,6 @@ class Likelihood:
         for gi in gradients:
             gradients[gi] = self.gradfactor(params[gi], gradients[gi])
 
-        if jnp.isnan(value): value = np.inf
         return value, gradients
 
     @partial(jit, static_argnums=(0,))
