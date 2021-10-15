@@ -6,13 +6,16 @@ from pyDOE import lhs  # for initial dataset
 import numpy as np
 
 # Mobo Libraries
-from Kernels.JAX.rbf import RBF
+from Kernels.JAX.matern import MATERN32
 from Likelihoods.JAX.chol import Likelihood
 from Models.JAX.GPregression import GPregression
 from ModelOptimizers.lbfgsb import lbfgsb
 
 from Acquisitions.JAX.EI import AcquisitionEI
 from AcquisitionOptimizers.lbfgsb import AOlbfgs
+
+from GPy.models import GPRegression
+from GPy.kern import Matern32 as gpymatern
 
 
 class BO:
@@ -50,12 +53,19 @@ class BO:
                 print("iteration %i min value: %.5f" % (it, min(y)))
 
             # 1. Design and Train Model
-            kernel = RBF(x.shape, ARD=False)
+            kernel = MATERN32(x.shape, ARD=True)
             model = GPregression(kernel, x, y)
             likelihood = Likelihood(model)
             # call likelihood.evaluate() -> if you do not wish to train the model
             model_optimizer = lbfgsb(model)
             model_optimizer.opt()
+            print(model.log_likelihood)
+
+            # 1. Design and Train Model
+            gpy_kernel = gpymatern(input_dim=self.dim, ARD=False)
+            gpy_model = GPRegression(x, y, kernel=gpy_kernel)
+            gpy_model.optimize()
+            print(gpy_model.log_likelihood())
 
             # 2. Select next sample point
             acquisition = AcquisitionEI(model, min(y))
