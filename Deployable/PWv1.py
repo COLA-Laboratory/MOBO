@@ -70,7 +70,7 @@ class BO:
             # 2. Select next sample point
             acquisition = AcquisitionEI(model, min(y))
             acquisition_optimizer = AOlbfgs(acquisition, self.lb, self.ub)
-            sample, ei_val = acquisition_optimizer.opt(restarts=10, verbose=False)
+            sample, ei_val = acquisition_optimizer.opt(restarts=10, verbose=True)
 
             # 3. Evaluate Sample and append to the dataset
             s_eval = self.function(sample)
