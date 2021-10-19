@@ -19,15 +19,24 @@ def NARDf(params, x, y):
     r = euclidean_distance(x, y) / params["lengthscale"][0]
     return params["variance"][0] * jnp.exp(-0.5 * r ** 2)
 
+@jit
+def ARDf(params, x, y):
+    r = seuclidean_distance(x / params["lengthscale"][0], y / params["lengthscale"][0])
+    return params["variance"][0] * jnp.exp(-0.5 * r)
+
 
 class RBF:
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
         self.dataset_shape = dataset_shape
-        self.parameters = {"variance": jnp.ones((1,)) * variance * 1.,
-                           "lengthscale": jnp.ones((1,)) * lengthscale * 1.}
+        if ARD:
+            self.parameters = {"variance": jnp.ones((1,)) * variance * 1.,
+                               "lengthscale": jnp.ones((dataset_shape[1],)) * lengthscale * 1.}
 
-        self.ard = ARD
-        self.rbf_kernel = NARDf
+            self.rbf_kernel = ARDf
+        else:
+            self.parameters = {"variance": jnp.ones((1,)) * variance * 1.,
+                               "lengthscale": jnp.ones((1,)) * lengthscale * 1.}
+            self.rbf_kernel = NARDf
 
     @partial(jit, static_argnums=(0, ))
     def function(self, X, params):

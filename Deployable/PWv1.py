@@ -53,7 +53,7 @@ class BO:
                 print("iteration %i min value: %.5f" % (it, min(y)))
 
             # 1. Design and Train Model
-            kernel = RBF(dataset_shape=x.shape)
+            kernel = RBF(dataset_shape=x.shape, ARD=True)
             model = GPregression(kernel, x, y)
             likelihood = Likelihood(model)
             # call likelihood.evaluate() -> if you do not wish to train the model
@@ -62,7 +62,7 @@ class BO:
             print("MOBO:", model.log_likelihood)
 
             # 1. Design and Train Model
-            gpy_kernel = gpymatern(input_dim=self.dim, ARD=False)
+            gpy_kernel = gpymatern(input_dim=self.dim, ARD=True)
             gpy_model = GPRegression(x, y, kernel=gpy_kernel)
             gpy_model.optimize()
             print("GPY:", gpy_model.log_likelihood())
@@ -70,7 +70,7 @@ class BO:
             # 2. Select next sample point
             acquisition = AcquisitionEI(model, min(y))
             acquisition_optimizer = AOlbfgs(acquisition, self.lb, self.ub)
-            sample, ei_val = acquisition_optimizer.opt(restarts=100, verbose=False)
+            sample, ei_val = acquisition_optimizer.opt(restarts=10, verbose=False)
 
             # 3. Evaluate Sample and append to the dataset
             s_eval = self.function(sample)
