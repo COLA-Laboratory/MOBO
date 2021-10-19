@@ -49,10 +49,8 @@ if __name__ == "__main__":
     print(jax_model.log_likelihood)
 
     acquisition = AcquisitionEI(jax_model, np.min(y))
-
     unknown_point = np.random.uniform(-5, 5, (1, dim))
     value, grad = value_and_grad(acquisition.function, argnums=0)(unknown_point)
-
     print(value, grad)
 
     #jax_mean, jax_variance = jax_model.predict(Xtest, full_cov=False)
