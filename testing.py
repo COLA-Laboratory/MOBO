@@ -2,7 +2,7 @@
 Example of how to use the current version of the library.
 """
 
-from Kernels.JAX.rbf import RBF as RBFj
+from Kernels.JAX.Matrixy.rbf import RBF as RBFj
 from Models.JAX.GPregression import GPregression as JGP
 from Likelihoods.JAX.chol import Likelihood as JL
 from Acquisitions.JAX.EI import AcquisitionEI
