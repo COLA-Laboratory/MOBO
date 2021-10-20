@@ -21,7 +21,7 @@ def NARDf(params, x, y):
 
 @jit
 def ARDf(params, x, y):
-    r = seuclidean_distance(x / params["lengthscale"][0], y / params["lengthscale"][0])
+    r = seuclidean_distance(x / params["lengthscale"], y / params["lengthscale"])
     return params["variance"][0] * jnp.exp(-0.5 * r)
 
 
