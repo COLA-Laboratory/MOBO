@@ -11,13 +11,10 @@ class CountSketch:
         self.effective_dim = effective_dim
         self.main_dim = main_dim
 
-    def evaluate(self, low_dim_vectors):
-        n = len(low_dim_vectors)
-        high_dim_vectors = np.empty(n, self.main_dim)
+    def evaluate(self, low_dim_vector):
+        high_dim_vector = np.empty((self.main_dim,))
         for i in range(self.main_dim):
-            high_dim_vectors[:, i] = self.sign[i] * low_dim_vectors[:, self.h[i]]
+            high_dim_vector[i] = self.sign[i] * low_dim_vector[self.h[i]]
 
-        for i in range(n):
-            high_dim_vectors[i] = np.clip(high_dim_vectors[i], -1, 1)
+        return np.clip(high_dim_vector, -1, 1)
 
-        return high_dim_vectors
