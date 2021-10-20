@@ -3,6 +3,7 @@ config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 from functools import partial
 import numpy as np
+from Kernels.Kernel import VanillaKernel
 
 
 @jit
@@ -25,7 +26,7 @@ def euclidean_distance(X, X2):
     return r2
 
 
-class MATERN32:
+class MATERN32(VanillaKernel):
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
         dim = dataset_shape[1]
         if ARD:
@@ -68,7 +69,7 @@ class MATERN32:
         self.parameters["variance"] = params["variance"]
 
 
-class MATERN52:
+class MATERN52(VanillaKernel):
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
         dim = dataset_shape[1]
         if ARD:

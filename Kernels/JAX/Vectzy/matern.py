@@ -2,6 +2,7 @@ from functools import partial
 from jax import jit, vmap, config
 import jax.numpy as jnp
 from typing import Dict
+from Kernels.Kernel import VanillaKernel
 config.update("jax_enable_x64", True)
 
 
@@ -37,7 +38,7 @@ def ARDf52(params, x, y):
     return params["variance"][0]*(1+jnp.sqrt(5.)*r+5./3*r**2)*jnp.exp(-jnp.sqrt(5.)*r)
 
 
-class MATERN32:
+class MATERN32(VanillaKernel):
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
         self.dataset_shape = dataset_shape
         if ARD:
@@ -77,7 +78,7 @@ class MATERN32:
         self.parameters["variance"] = params["variance"]
 
 
-class MATERN52:
+class MATERN52(VanillaKernel):
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
         self.dataset_shape = dataset_shape
         if ARD:

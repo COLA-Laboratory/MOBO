@@ -3,6 +3,7 @@ config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
 from functools import partial
+from Kernels.Kernel import VanillaKernel
 
 
 @jit
@@ -37,7 +38,7 @@ def euclidean_distance_s(X , X2):
     return r2
 
 
-class RBF:
+class RBF(VanillaKernel):
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
         dim = dataset_shape[1]
         if ARD:

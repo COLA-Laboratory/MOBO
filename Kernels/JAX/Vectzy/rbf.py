@@ -2,6 +2,7 @@ from functools import partial
 from jax import jit, vmap, config
 import jax.numpy as jnp
 from typing import Dict
+from Kernels.Kernel import VanillaKernel
 config.update("jax_enable_x64", True)
 
 
@@ -25,7 +26,7 @@ def ARDf(params, x, y):
     return params["variance"][0] * jnp.exp(-0.5 * r)
 
 
-class RBF:
+class RBF(VanillaKernel):
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
         self.dataset_shape = dataset_shape
         if ARD:
