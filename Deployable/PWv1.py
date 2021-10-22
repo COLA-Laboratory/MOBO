@@ -6,7 +6,8 @@ from pyDOE import lhs  # for initial dataset
 import numpy as np
 
 # Mobo Libraries
-from Kernels.JAX.Vectzy.matern import MATERN32
+from Kernels.JAX.Vectzy.rbf import RBF
+from Kernels.JAX.Vectzy.Warping import KumaraswamyKernel
 from Likelihoods.JAX.chol import Likelihood
 from Models.JAX.GPregression import GPregression
 from ModelOptimizers.lbfgsb import lbfgsb
@@ -15,7 +16,7 @@ from Acquisitions.JAX.EI import AcquisitionEI
 from AcquisitionOptimizers.lbfgsb import AOlbfgs
 
 from GPy.models import GPRegression
-from GPy.kern import Matern32 as gpymatern
+from GPy.kern import RBF as gpymatern
 
 
 class BO:
@@ -53,12 +54,14 @@ class BO:
                 print("iteration %i min value: %.5f" % (it, min(y)))
 
             # 1. Design and Train Model
-            kernel = MATERN32(dataset_shape=x.shape, ARD=True)
+            kernel = RBF(dataset_shape=x.shape, ARD=True)
+            kernel = KumaraswamyKernel(kernel)
             model = GPregression(kernel, x, y)
             likelihood = Likelihood(model)
             # call likelihood.evaluate() -> if you do not wish to train the model
             model_optimizer = lbfgsb(model)
             model_optimizer.opt()
+            print(model.parameters)
             print("MOBO:", model.log_likelihood)
 
             # 1. Design and Train Model
