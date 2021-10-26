@@ -7,7 +7,7 @@ import numpy as np
 
 # Mobo Libraries
 from Kernels.JAX.Vectzy.rbf import RBF
-from Kernels.JAX.Vectzy.Warping import KumaraswamyKernel
+from Kernels.JAX.Vectzy.KumaraswamyKernel import KumaraswamyKernel
 from Likelihoods.JAX.chol import Likelihood
 from Models.JAX.GPregression import GPregression
 from ModelOptimizers.lbfgsb import lbfgsb
