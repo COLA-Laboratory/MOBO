@@ -1,18 +1,17 @@
 from functools import partial
-from jax import jit, vmap, config
+from jax import jit, config
 import jax.numpy as jnp
-from typing import Dict
 from Kernels.Kernel import VanillaKernel
 config.update("jax_enable_x64", True)
 
 @jit
 def KumaraswamyCDF(params, x):
-    return 1 - (1 - x ** params["b"]) ** params["b"]
+    return 1 - (1 - x ** params["a"]) ** params["b"]
 
 
 class KumaraswamyKernel(VanillaKernel):
     """
-    Input warping function is the Kumaraswamy CDF: 1 - (1 - x^d)^b
+    Input warping function is the Kumaraswamy CDF: 1 - (1 - x^a)^b
     CDF outputs are bounded to [0, 1]
      -> please ensure your data is also bounded within this range...until
      I suss out a method of not requiring such a normalization
@@ -32,12 +31,12 @@ class KumaraswamyKernel(VanillaKernel):
 
     @partial(jit, static_argnums=(0,))
     def cov(self, X, X2):
-        return self.kernel.cov(
-            self.warping(self.parameters, X),
-            self.warping(self.parameters, X2)
-        )
+        X = self.warping(self.parameters, X)
+        X2 = self.warping(self.parameters, X2)
+        return self.kernel.cov(X, X2)
 
     def set_parameters(self, params):
         self.parameters = params
+        self.kernel.set_parameters(params)
 
 
