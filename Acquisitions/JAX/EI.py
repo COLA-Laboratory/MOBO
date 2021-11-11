@@ -22,12 +22,21 @@ class AcquisitionEI:
         return v, np.array(g[0])
 
     @partial(jit, static_argnums=(0,))
-    def function(self, x):
+    def collective_function(self, x):
         mean, var = self.model.predict(x)
-
         s = jnp.sqrt(var)
         u = (self.fmin - mean - self.jitter) / s
         phi = jnp.exp(-0.5 * u ** 2) / jnp.sqrt(2 * jnp.pi)
         Phi = 0.5 * erfc(-u / jnp.sqrt(2))
 
-        return -jnp.sum(s * (u * Phi + phi))
+        return -jnp.sum(s * (u * Phi + phi), axis=1)
+
+    @partial(jit, static_argnums=(0,))
+    def function(self, x):
+        mean, var = self.model.predict(x)
+        s = jnp.sqrt(var)
+        u = (self.fmin - mean - self.jitter) / s
+        phi = jnp.exp(-0.5 * u ** 2) / jnp.sqrt(2 * jnp.pi)
+        Phi = 0.5 * erfc(-u / jnp.sqrt(2))
+
+        return -jnp.sum(s * (u * Phi + phi), axis=1)[0]

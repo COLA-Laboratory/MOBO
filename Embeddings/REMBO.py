@@ -73,6 +73,9 @@ class LS(Random):
         org_bp_matrix = np.matmul(np.matmul(A, np.linalg.inv(np.matmul(A.T, A))), A.T)
         self.bp_matrix = np.transpose(org_bp_matrix)
 
+    def embed(self, high_dim_vector):
+        return np.matmul(self.projection.A, high_dim_vector)
+
     def project(self, y):
         """
         This method projects solutions into higher dimensional space to a point x that minimizes
@@ -85,6 +88,7 @@ class LS(Random):
         P = matrix(2 * np.eye(self.original_dim))
         q = matrix(-2 * map)
 
+        print(np.linalg.matrix_rank(A), np.linalg.matrix_rank(P), y.shape)
         sol = solvers.qp(P, q, A=A, b=b)
 
         res = np.reshape(np.array(sol['x']), (self.original_dim,))
