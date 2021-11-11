@@ -1,5 +1,4 @@
 
-
 class VanillaKernel:
 
     def function(self, X, params):
