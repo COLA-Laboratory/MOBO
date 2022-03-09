@@ -81,9 +81,9 @@ if __name__ == "__main__":
     from jax import value_and_grad, vjp
     import jax.numpy as jnp
     np.random.seed(1)
-    dim = 2
+    dim = 1
     f = sphere
-    X = np.random.uniform(-5, 5, (100, dim))
+    X = np.random.uniform(-5, 5, (10, dim))
     y = np.array([f(xi) for xi in X]).reshape(-1, 1)
 
     #plt.plot(X, y, 'o')
@@ -100,13 +100,11 @@ if __name__ == "__main__":
 
     print("mobo:", jax_model.log_likelihood)
 
-    #Xtest = np.linspace(-5, 5, 100).reshape(-1, 1)
-    Xtest = np.random.uniform(-5, 5, (100, dim))
+    Xtest = np.linspace(-5, 5, 100).reshape(-1, 1)
+    #Xtest = np.random.uniform(-5, 5, (100, dim))
 
-    eis = np.array([jax_ei.value_and_gradient(xi)[0] for xi in Xtest]).flatten()
-    #eis, _ = jax_model.predict(Xtest)
-    #plt.plot(Xtest.flatten(), eis)
-    #print(jax_ei.value_and_gradient(Xtest1))
+    mobo_eis = np.array([jax_ei.value_and_gradient(xi)[0] for xi in Xtest]).flatten()
+    #mobo_eis, _ = jax_model.predict(Xtest, full_cov=False)
 
     gpy_kernel = RBFg(input_dim=dim, ARD=False)
     gpy_model = gpy(X, y, gpy_kernel)
@@ -115,12 +113,14 @@ if __name__ == "__main__":
     print("gpy:", gpy_model.log_likelihood())
 
     gpy_ei = GPyEI(gpy_model, min(y))
-    eis = np.array([gpy_ei._compute_acq(xi) for xi in Xtest]).flatten()
+    eis = gpy_ei._compute_acq(Xtest)
+    #eis = np.array([gpy_ei._compute_acq(xi) for xi in Xtest]).flatten()
     #eis, _ = gpy_model.predict(Xtest)
 
-    #plt.plot(Xtest.flatten(), eis)
-    #plt.legend(["jax", "gpy"])
-    #plt.show()
+    plt.plot(Xtest.flatten(), mobo_eis)
+    plt.plot(Xtest.flatten(), eis)
+    plt.legend(["mobo", "gpy"])
+    plt.show()
 
     #plt.plot(Xtest.flatten(), jax_model.predict(Xtest)[0])
     #plt.plot(Xtest.flatten(), gpy_model.predict(Xtest)[0])

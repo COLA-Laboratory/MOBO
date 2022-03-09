@@ -29,15 +29,16 @@ def euclidean_distance(X, X2):
 class MATERN32(VanillaKernel):
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
         dim = dataset_shape[1]
+        self.id = 0
         if ARD:
-            self.parameters = {"variance": jnp.ones((1,)) * variance * 1.,
-                               "lengthscale": jnp.ones((dim,)) * lengthscale * 1.}
+            self.parameters = {"variance"+str(self.id): jnp.ones((1,)) * variance * 1.,
+                               "lengthscale"+str(self.id): jnp.ones((dim,)) * lengthscale * 1.}
             self.function = self.ARDf
             self.cov = self.ARD
 
         else:
-            self.parameters = {"variance": jnp.ones((1,)) * variance * 1.,
-                                "lengthscale": jnp.ones((1,)) * lengthscale * 1.}
+            self.parameters = {"variance"+str(self.id): jnp.ones((1,)) * variance * 1.,
+                                "lengthscale"+str(self.id): jnp.ones((1,)) * lengthscale * 1.}
             self.function = self.NARDf
             self.cov = self.NARD
 
@@ -46,41 +47,47 @@ class MATERN32(VanillaKernel):
 
     @partial(jit, static_argnums=(0,))
     def NARDf(self, X, params):
-        r = ieuclidean_distance(X, self.diagonal) / params["lengthscale"]
-        return params["variance"] * (1. + jnp.sqrt(3.) * r) * jnp.exp(-jnp.sqrt(3.) * r)
+        r = ieuclidean_distance(X, self.diagonal) / params["lengthscale"+str(self.id)]
+        return params["variance"+str(self.id)] * (1. + jnp.sqrt(3.) * r) * jnp.exp(-jnp.sqrt(3.) * r)
 
     @partial(jit, static_argnums=(0,))
     def ARDf(self, X, params):
-        r = ieuclidean_distance(X / params["lengthscale"], self.diagonal)
-        return params["variance"] * (1. + jnp.sqrt(3.) * r) * jnp.exp(-jnp.sqrt(3.) * r)
+        r = ieuclidean_distance(X / params["lengthscale"+str(self.id)], self.diagonal)
+        return params["variance"+str(self.id)] * (1. + jnp.sqrt(3.) * r) * jnp.exp(-jnp.sqrt(3.) * r)
 
     @partial(jit, static_argnums=(0,))
     def NARD(self, X, X2):
-        r = euclidean_distance(X, X2) / self.parameters["lengthscale"]
-        return self.parameters["variance"] * (1. + jnp.sqrt(3.) * r) * jnp.exp(-jnp.sqrt(3.) * r)
+        r = euclidean_distance(X, X2) / self.parameters["lengthscale"+str(self.id)]
+        return self.parameters["variance"+str(self.id)] * (1. + jnp.sqrt(3.) * r) * jnp.exp(-jnp.sqrt(3.) * r)
 
     @partial(jit, static_argnums=(0,))
     def ARD(self, X, X2):
-        r = euclidean_distance(X / self.parameters["lengthscale"], X2 / self.parameters["lengthscale"])
-        return self.parameters["variance"] * (1. + jnp.sqrt(3.) * r) * jnp.exp(-jnp.sqrt(3.) * r)
+        r = euclidean_distance(X / self.parameters["lengthscale"+str(self.id)], X2 / self.parameters["lengthscale"])
+        return self.parameters["variance"+str(self.id)] * (1. + jnp.sqrt(3.) * r) * jnp.exp(-jnp.sqrt(3.) * r)
 
     def set_parameters(self, params):
-        self.parameters["lengthscale"] = params["lengthscale"]
-        self.parameters["variance"] = params["variance"]
+        self.parameters["lengthscale"+str(self.id)] = params["lengthscale"+str(self.id)]
+        self.parameters["variance"+str(self.id)] = params["variance"+str(self.id)]
+
+    def change_id(self, new_id):
+        self.parameters["variance"+str(new_id)] = self.parameters.pop("variance"+str(self.id))
+        self.parameters["lengthscale" + str(new_id)] = self.parameters.pop("lengthscale" + str(self.id))
+        self.id = new_id
 
 
 class MATERN52(VanillaKernel):
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
         dim = dataset_shape[1]
+        self.id = 0
         if ARD:
-            self.parameters = {"variance": jnp.ones((1,)) * variance * 1.,
-                               "lengthscale": jnp.ones((dim,)) * lengthscale * 1.}
+            self.parameters = {"variance"+str(self.id): jnp.ones((1,)) * variance * 1.,
+                               "lengthscale"+str(self.id): jnp.ones((dim,)) * lengthscale * 1.}
             self.function = self.ARDf
             self.cov = self.ARD
 
         else:
-            self.parameters = {"variance": jnp.ones((1,)) * variance * 1.,
-                                "lengthscale": jnp.ones((1,)) * lengthscale * 1.}
+            self.parameters = {"variance"+str(self.id): jnp.ones((1,)) * variance * 1.,
+                                "lengthscale"+str(self.id): jnp.ones((1,)) * lengthscale * 1.}
             self.function = self.NARDf
             self.cov = self.NARD
 
@@ -89,24 +96,29 @@ class MATERN52(VanillaKernel):
 
     @partial(jit, static_argnums=(0,))
     def NARDf(self, X, params):
-        r = ieuclidean_distance(X, self.diagonal) / params["lengthscale"]
-        return params["variance"]*(1+jnp.sqrt(5.)*r+5./3*r**2)*jnp.exp(-jnp.sqrt(5.)*r)
+        r = ieuclidean_distance(X, self.diagonal) / params["lengthscale"+str(self.id)]
+        return params["variance"+str(self.id)]*(1+jnp.sqrt(5.)*r+5./3*r**2)*jnp.exp(-jnp.sqrt(5.)*r)
 
     @partial(jit, static_argnums=(0,))
     def ARDf(self, X, params):
-        r = ieuclidean_distance(X / params["lengthscale"], self.diagonal)
-        return params["variance"]*(1+jnp.sqrt(5.)*r+5./3*r**2)*jnp.exp(-jnp.sqrt(5.)*r)
+        r = ieuclidean_distance(X / params["lengthscale"+str(self.id)], self.diagonal)
+        return params["variance"+str(self.id)]*(1+jnp.sqrt(5.)*r+5./3*r**2)*jnp.exp(-jnp.sqrt(5.)*r)
 
     @partial(jit, static_argnums=(0,))
     def NARD(self, X, X2):
-        r = euclidean_distance(X, X2) / self.parameters["lengthscale"]
-        return self.parameters["variance"]*(1+jnp.sqrt(5.)*r+5./3*r**2)*jnp.exp(-jnp.sqrt(5.)*r)
+        r = euclidean_distance(X, X2) / self.parameters["lengthscale"+str(self.id)]
+        return self.parameters["variance"+str(self.id)]*(1+jnp.sqrt(5.)*r+5./3*r**2)*jnp.exp(-jnp.sqrt(5.)*r)
 
     @partial(jit, static_argnums=(0,))
     def ARD(self, X, X2):
-        r = euclidean_distance(X / self.parameters["lengthscale"], X2 / self.parameters["lengthscale"])
-        return self.parameters["variance"]*(1+jnp.sqrt(5.)*r+5./3*r**2)*jnp.exp(-jnp.sqrt(5.)*r)
+        r = euclidean_distance(X / self.parameters["lengthscale"+str(self.id)], X2 / self.parameters["lengthscale"])
+        return self.parameters["variance"+str(self.id)]*(1+jnp.sqrt(5.)*r+5./3*r**2)*jnp.exp(-jnp.sqrt(5.)*r)
 
     def set_parameters(self, params):
-        self.parameters["lengthscale"] = params["lengthscale"]
-        self.parameters["variance"] = params["variance"]
+        self.parameters["lengthscale"+str(self.id)] = params["lengthscale"+str(self.id)]
+        self.parameters["variance"+str(self.id)] = params["variance"+str(self.id)]
+
+    def change_id(self, new_id):
+        self.parameters["variance"+str(new_id)] = self.parameters.pop("variance"+str(self.id))
+        self.parameters["lengthscale" + str(new_id)] = self.parameters.pop("lengthscale" + str(self.id))
+        self.id = new_id
