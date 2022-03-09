@@ -60,3 +60,6 @@ class Product(VanillaKernel):
     def set_parameters(self, params):
         for kern in self.parts:
             kern.set_parameters(params)
+
+    def cov(self, X, X2):
+        return reduce(jnp.multiply, (p.cov(X, X2) for p in self.parts))
