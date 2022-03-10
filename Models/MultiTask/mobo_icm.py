@@ -26,8 +26,8 @@ if __name__ == "__main__":
 
     np.random.seed(0)
 
-    data1 = np.random.uniform(-5, 5, size=(8, 1))
-    data2 = np.random.uniform(-5, 5, size=(3, 1))
+    data1 = np.random.uniform(-5, 5, size=(5, 1))
+    data2 = np.random.uniform(-5, 5, size=(5, 1))
 
     y1 = np.array([sphere1(di) for di in data1]).reshape((-1, 1))
     y2 = np.array([sphere2(di) for di in data2]).reshape((-1, 1))
