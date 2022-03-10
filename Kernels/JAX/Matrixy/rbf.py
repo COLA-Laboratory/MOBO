@@ -43,7 +43,7 @@ class RBF(VanillaKernel):
         dim = dataset_shape[1]
         self.id = 0
         if ARD:
-            self.parameters = {"variance"+str(self.id): jnp.ones((1,)) * variance * 1.,
+            self.parameters = {"vafriance"+str(self.id): jnp.ones((1,)) * variance * 1.,
                                "lengthscale"+str(self.id): jnp.ones((dim,)) * lengthscale * 1.}
             self.function = self.ARDf
             self.cov = self.ARD
