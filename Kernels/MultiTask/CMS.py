@@ -9,34 +9,6 @@ def LCM(input_dim, num_outputs, kernels_list, W_ranks):
 
     return K
 
-"""
-class LCM(VanillaKernel):
-    def __init__(self, input_dim, num_outputs, kernels_list, W_ranks):
-        self.num_outputs = num_outputs
-        self.icms = [ICM(input_dim, num_outputs, kernels_list[i], W_ranks[i]) for i in range(len(kernels_list))]
-        self.input_dim = input_dim
-
-    def function(self, X, params):
-        return sum(k.function(X, params) for k in self.icms)
-
-    def cov(self, X, X2):
-        return sum(k.cov(X, X2) for k in self.icms)
-
-    def change_id(self, new_id):
-        for ki in self.icms:
-            ki.change_id(new_id)
-
-    def set_parameters(self, params):
-        for ki in self.icms:
-            ki.set_parameters(params)
-
-    @property
-    def parameters(self):
-        p = {}
-        for ki in self.icms:
-            p.update(ki.parameters)
-        return p
-"""
 
 class ICM(VanillaKernel):
     def __init__(self, input_dim, num_outputs, kernel, W_rank=1):
