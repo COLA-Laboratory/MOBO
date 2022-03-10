@@ -8,7 +8,7 @@ from Models.JAX.GPregression import GPregression
 from ModelOptimizers.lbfgsb import lbfgsb
 from Likelihoods.JAX.chol import Likelihood
 
-from Kernels.MultiTask.CMS import LCM
+from Kernels.MultiTask.CMS import LCM, ICM
 from Models.MultiTask.GPCoregionalizedRegression import GPCoregionalizedRegression
 
 import GPy
@@ -26,8 +26,8 @@ if __name__ == "__main__":
 
     np.random.seed(0)
 
-    data1 = np.random.uniform(-5, 5, size=(8, 1))
-    data2 = np.random.uniform(-5, 5, size=(3, 1))
+    data1 = np.random.uniform(-5, 5, size=(8, 2))
+    data2 = np.random.uniform(-5, 5, size=(3, 2))
 
     y1 = np.array([sphere1(di) for di in data1]).reshape((-1, 1))
     y2 = np.array([sphere2(di) for di in data2]).reshape((-1, 1))
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     input_kern1 = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=False)
     input_kern2 = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=False)
 
-    #kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern, W_rank=2)
+    #kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern1, W_rank=2)
     kern = LCM(input_dim=data1.shape[1], num_outputs=2, kernels_list=[input_kern1, input_kern2], W_ranks=[1, 1])
     gp = GPCoregionalizedRegression(5, [data1, data2], [y1, y2], kernel=kern)
     likelihood = Likelihood(gp)

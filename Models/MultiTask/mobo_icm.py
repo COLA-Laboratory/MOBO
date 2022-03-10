@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from functools import reduce
 
-from Kernels.JAX.Matrixy.rbf import RBF
+from Kernels.JAX.Vectzy.rbf import RBF
 from Models.JAX.GPregression import GPregression
 from ModelOptimizers.lbfgsb import lbfgsb
 from Likelihoods.JAX.chol import Likelihood
@@ -26,15 +26,14 @@ if __name__ == "__main__":
 
     np.random.seed(0)
 
-    data1 = np.random.uniform(-5, 5, size=(5, 1))
-    data2 = np.random.uniform(-5, 5, size=(5, 1))
+    data1 = np.random.uniform(-5, 5, size=(10, 2))
+    data2 = np.random.uniform(-5, 5, size=(1, 2))
 
     y1 = np.array([sphere1(di) for di in data1]).reshape((-1, 1))
     y2 = np.array([sphere2(di) for di in data2]).reshape((-1, 1))
 
     input_kern = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=True)
-
-    kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern, W_rank=2)
+    kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern, W_rank=5)
 
     gp = GPCoregionalizedRegression(5, [data1, data2], [y1, y2], kernel=kern)
     likelihood = Likelihood(gp)
@@ -44,63 +43,67 @@ if __name__ == "__main__":
     print(gp.parameters)
     likelihood.evaluate()
 
-    test_data1 = np.arange(-5, 5, 0.1).reshape((-1, 1))
+    #test_data1 = np.arange(-5, 5, 0.1).reshape((-1, 1))
+    test_data1 = np.random.uniform(-5, 5, (100, data1.shape[1]))
 
-    y1_test = np.array([sphere1(di) for di in test_data1]).reshape((-1, 1))
-    y2_test = np.array([sphere2(di) for di in test_data1]).reshape((-1, 1))
+    y1_test = np.array([sphere1(di) for di in test_data1])
+    y2_test = np.array([sphere2(di) for di in test_data1])
 
     mu, _ = gp.predict(Xnew_list=[test_data1], index=0)
+    print(sum(abs(y1_test - mu.flatten()))/len(y1_test))
 
-    plt.plot(test_data1, mu)
-    plt.plot(test_data1, y1_test)
-    plt.legend(["mu", "true"])
-    plt.plot(data1, y1, 'o')
-    plt.title("MOBO")
-    plt.show()
+    #plt.plot(test_data1, mu)
+    #plt.plot(test_data1, y1_test)
+    #plt.legend(["mu", "true"])
+    #plt.plot(data1, y1, 'o')
+    #plt.title("MOBO")
+    #plt.show()
 
     mu, _ = gp.predict(Xnew_list=[test_data1], index=1)
+    print(sum(abs(y1_test - mu.flatten())) / len(y2_test))
 
-    plt.plot(test_data1, mu)
-    plt.plot(test_data1, y2_test)
-    plt.legend(["mu", "true"])
-    plt.plot(data2, y2, 'o')
-    plt.title("MOBO")
-    plt.show()
+    #plt.plot(test_data1, mu)
+    #plt.plot(test_data1, y2_test)
+    #plt.legend(["mu", "true"])
+    #plt.plot(data2, y2, 'o')
+    #plt.title("MOBO")
+    #plt.show()
 
-    """
-    k = GPy.kern.RBF(input_dim=data1.shape[1], ARD=True)
+    k = GPy.kern.RBF(input_dim=data1.shape[1], ARD=False)
     icm = GPy.util.multioutput.ICM(input_dim=data1.shape[1], num_outputs=2, kernel=k, W_rank=2)
     m = GPy.models.GPCoregionalizedRegression([data1, data2], [y1, y2], kernel=icm)
 
     m.optimize()
     print(m.log_likelihood())
 
-    test_data1 = np.arange(-5, 5, 0.1).reshape((-1, 1))
+    #test_data1 = np.arange(-5, 5, 0.1).reshape((-1, 1))
+    test_data1 = np.random.uniform(-5, 5, (100, data1.shape[1]))
 
-    y1_test = np.array([sphere1(di) for di in test_data1]).reshape((-1, 1))
-    y2_test = np.array([sphere2(di) for di in test_data1]).reshape((-1, 1))
+    y1_test = np.array([sphere1(di) for di in test_data1])
+    y2_test = np.array([sphere2(di) for di in test_data1])
 
     test = np.hstack([test_data1, 0 * np.ones_like(test_data1)])
 
     n = {'output_index': np.asarray([[0] for _ in range(len(test_data1))]).astype(int)}
     mu, var = m.predict(test, Y_metadata=n)
+    print(sum(abs(y1_test - mu.flatten())) / len(y1_test))
 
-    plt.plot(test_data1, mu)
-    plt.plot(test_data1, y1_test)
-    plt.legend(["mu", "true"])
-    plt.plot(data1, y1, 'o')
-    plt.title("Gpy")
-    plt.show()
+    #plt.plot(test_data1, mu)
+    #plt.plot(test_data1, y1_test)
+    #plt.legend(["mu", "true"])
+    #plt.plot(data1, y1, 'o')
+    #plt.title("Gpy")
+    #plt.show()
 
     test = np.hstack([test_data1, 1 * np.ones_like(test_data1)])
 
     n = {'output_index': np.asarray([[1] for _ in range(len(test_data1))]).astype(int)}
     mu, var = m.predict(test, Y_metadata=n)
+    print(sum(abs(y1_test - mu.flatten())) / len(y2_test))
 
-    plt.plot(test_data1, mu)
-    plt.plot(test_data1, y2_test)
-    plt.legend(["mu", "true"])
-    plt.plot(data2, y2, 'o')
-    plt.title("Gpy")
-    plt.show()
-    """
+    #plt.plot(test_data1, mu)
+    #plt.plot(test_data1, y2_test)
+    #plt.legend(["mu", "true"])
+    #plt.plot(data2, y2, 'o')
+    #plt.title("Gpy")
+    #plt.show()

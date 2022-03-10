@@ -41,7 +41,7 @@ class Likelihood:
     def evaluate(self):
         K = self.model.kernel.function(self.model.X,
                                        self.model.parameters)\
-            + jnp.eye(self.N) * (sum(self.model.parameters["noise"] + 1e-8))
+            + jnp.eye(self.N) * (self.model.parameters["noise"] + 1e-8)
 
         self.L = cholesky(K, lower=True)
         self.alpha = solve_triangular(self.L.T, solve_triangular(self.L, self.model.y, lower=True))
@@ -50,7 +50,7 @@ class Likelihood:
     def log_likelihood(self, params):
         self.model.set_parameters(params)
         kx = self.model.kernel.function(self.model.X, params)
-        kx += jnp.eye(self.N) * (sum(params["noise"] + 1e-8))
+        kx += jnp.eye(self.N) * (params["noise"] + 1e-8)
         L = cholesky(kx, lower=True)
 
         alpha = solve_triangular(L.T, solve_triangular(L, self.model.y, lower=True))
@@ -86,7 +86,7 @@ class Likelihood:
 
         tmp = solve_triangular(self.L, Kx, lower=True)
 
-        var = Kxx - jnp.dot(tmp.T, tmp) + jnp.eye(Xnew.shape[0]) * sum(self.model.variance)
+        var = Kxx - jnp.dot(tmp.T, tmp) + jnp.eye(Xnew.shape[0]) * (self.model.variance + 1e-8)
 
         return mu, var
 

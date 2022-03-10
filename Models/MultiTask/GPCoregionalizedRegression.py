@@ -27,7 +27,7 @@ class GPCoregionalizedRegression:
 
     def __init__(self, input_dim, X_list, Y_list, kernel, noise=1.):
         self.kernel = kernel
-        self.variance = np.ones((len(X_list),)) * noise * 1.
+        self.variance = np.ones((1,)) * noise * 1.
         self.X, self.y, self.I = build_XY(X_list, Y_list)
 
         self.likelihood = None
