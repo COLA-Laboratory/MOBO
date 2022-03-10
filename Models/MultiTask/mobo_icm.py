@@ -8,7 +8,7 @@ from Models.JAX.GPregression import GPregression
 from ModelOptimizers.lbfgsb import lbfgsb
 from Likelihoods.JAX.chol import Likelihood
 
-from Kernels.MultiTask.ICM import ICM
+from Kernels.MultiTask.CMS import ICM
 from Models.MultiTask.GPCoregionalizedRegression import GPCoregionalizedRegression
 
 import GPy
@@ -33,12 +33,14 @@ if __name__ == "__main__":
     y2 = np.array([sphere2(di) for di in data2]).reshape((-1, 1))
 
     input_kern = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=True)
+
     kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern, W_rank=2)
     gp = GPCoregionalizedRegression(5, [data1, data2], [y1, y2], kernel=kern)
     likelihood = Likelihood(gp)
     optimizer = lbfgsb(gp)
     optimizer.opt()
     print(gp.log_likelihood)
+    print(gp.parameters)
     likelihood.evaluate()
 
     test_data1 = np.arange(-5, 5, 0.1).reshape((-1, 1))
@@ -52,6 +54,7 @@ if __name__ == "__main__":
     plt.plot(test_data1, y1_test)
     plt.legend(["mu", "true"])
     plt.plot(data1, y1, 'o')
+    plt.title("MOBO")
     plt.show()
 
     mu, _ = gp.predict(Xnew_list=[test_data1], index=1)
@@ -60,6 +63,7 @@ if __name__ == "__main__":
     plt.plot(test_data1, y2_test)
     plt.legend(["mu", "true"])
     plt.plot(data2, y2, 'o')
+    plt.title("MOBO")
     plt.show()
 
     k = GPy.kern.RBF(input_dim=data1.shape[1], ARD=True)
@@ -83,6 +87,7 @@ if __name__ == "__main__":
     plt.plot(test_data1, y1_test)
     plt.legend(["mu", "true"])
     plt.plot(data1, y1, 'o')
+    plt.title("Gpy")
     plt.show()
 
     test = np.hstack([test_data1, 1 * np.ones_like(test_data1)])
@@ -94,4 +99,5 @@ if __name__ == "__main__":
     plt.plot(test_data1, y2_test)
     plt.legend(["mu", "true"])
     plt.plot(data2, y2, 'o')
+    plt.title("Gpy")
     plt.show()

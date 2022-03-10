@@ -19,11 +19,53 @@ class VanillaKernel:
     def __mul__(self, other):
         return Product([self, other])
 
+    def __add__(self, other):
+        return Sum([self, other])
+
     def set_parameters(self, params):
         pass
 
     def change_id(self, new_id):
         pass
+
+
+class Sum(VanillaKernel):
+    def __init__(self, kernels):
+        _newkerns = []
+        k = 0
+        for kern in kernels:
+            if isinstance(kern, Sum):
+                for part in kern.parts:
+                    part.change_id(k)
+                    _newkerns.append(part)
+                    k += 1
+
+            else:
+                kern.change_id(k)
+                _newkerns.append(kern)
+                k += 1
+
+        self.parts = _newkerns
+
+    @partial(jit, static_argnums=(0,))
+    def function(self, X, params):
+        r = sum(p.function(X, params) for p in self.parts)
+        return r
+
+    @property
+    def parameters(self):
+        p = {}
+        for kern in self.parts:
+            p.update(kern.parameters)
+
+        return p
+
+    def set_parameters(self, params):
+        for kern in self.parts:
+            kern.set_parameters(params)
+
+    def cov(self, X, X2):
+        return sum(p.cov(X, X2) for p in self.parts)
 
 
 class Product(VanillaKernel):
