@@ -32,8 +32,8 @@ if __name__ == "__main__":
     y1 = np.array([sphere1(di) for di in data1]).reshape((-1, 1))
     y2 = np.array([sphere2(di) for di in data2]).reshape((-1, 1))
 
-    input_kern1 = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=True)
-    input_kern2 = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=True)
+    input_kern1 = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=False)
+    input_kern2 = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=False)
 
     #kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern, W_rank=2)
     kern = LCM(input_dim=data1.shape[1], num_outputs=2, kernels_list=[input_kern1, input_kern2], W_ranks=[1, 1])
