@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     np.random.seed(0)
 
-    data1 = np.random.uniform(-5, 5, size=(10, 1))
+    data1 = np.random.uniform(-5, 5, size=(100, 1))
     data2 = np.random.uniform(-5, 5, size=(3, 1))
 
     y1 = np.array([sphere1(di) for di in data1]).reshape((-1, 1))
@@ -60,7 +60,6 @@ if __name__ == "__main__":
     plt.show()
 
     mu, _ = gp.predict(Xnew_list=[test_data1], index=1)
-    print(sum(abs(y1_test - mu.flatten())) / len(y2_test))
 
     plt.plot(test_data1, mu)
     plt.plot(test_data1, y2_test)
