@@ -32,7 +32,7 @@ if __name__ == "__main__":
     y1 = np.array([sphere1(di) for di in data1]).reshape((-1, 1))
     y2 = np.array([sphere2(di) for di in data2]).reshape((-1, 1))
 
-    input_kern = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]))
+    input_kern = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=True)
     kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern, W_rank=2)
     gp = GPCoregionalizedRegression(5, [data1, data2], [y1, y2], kernel=kern)
     likelihood = Likelihood(gp)
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     plt.plot(data2, y2, 'o')
     plt.show()
 
-    k = GPy.kern.RBF(input_dim=data1.shape[1])
+    k = GPy.kern.RBF(input_dim=data1.shape[1], ARD=True)
     icm = GPy.util.multioutput.ICM(input_dim=data1.shape[1], num_outputs=2, kernel=k, W_rank=2)
     m = GPy.models.GPCoregionalizedRegression([data1, data2], [y1, y2], kernel=icm)
 

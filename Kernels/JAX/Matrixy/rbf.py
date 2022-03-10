@@ -43,7 +43,7 @@ class RBF(VanillaKernel):
         dim = dataset_shape[1]
         self.id = 0
         if ARD:
-            self.parameters = {"vafriance"+str(self.id): jnp.ones((1,)) * variance * 1.,
+            self.parameters = {"variance"+str(self.id): jnp.ones((1,)) * variance * 1.,
                                "lengthscale"+str(self.id): jnp.ones((dim,)) * lengthscale * 1.}
             self.function = self.ARDf
             self.cov = self.ARD
@@ -74,8 +74,8 @@ class RBF(VanillaKernel):
 
     @partial(jit, static_argnums=(0,))
     def ARD(self, X, X2):
-        r = euclidean_distance_s(X / self.parameters["lengthscale"+str(self.id)], X2 / self.parameters["lengthscale"])
-        return self.parameters["variance"] * jnp.exp(-0.5 * r)
+        r = euclidean_distance_s(X / self.parameters["lengthscale"+str(self.id)], X2 / self.parameters["lengthscale"+str(self.id)])
+        return self.parameters["variance"+str(self.id)] * jnp.exp(-0.5 * r)
 
     def set_parameters(self, params):
         self.parameters["lengthscale"+str(self.id)] = params["lengthscale"+str(self.id)]
