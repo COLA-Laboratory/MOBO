@@ -9,7 +9,7 @@ class Dynamic(VanillaKernel):
     """
     Covariance function for intrinsic/linear coregionalization models.
     """
-    def __init__(self, output_dim, rank=1):
+    def __init__(self, output_dim, rank=1, time=1.):
         e = []
         for i in range(output_dim):
             e_ = []
@@ -33,7 +33,7 @@ class Dynamic(VanillaKernel):
 
         self.parameters = {"W"+str(self.id): W,
                            "kappa"+str(self.id): kappa,
-                           "time"+str(self.id): jnp.ones((1,)) * 1.}
+                           "time"+str(self.id): jnp.ones((1,)) * time}
 
     def change_id(self, new_id):
         self.parameters["W"+str(new_id)] = self.parameters.pop("W"+str(self.id))

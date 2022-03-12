@@ -34,9 +34,10 @@ if __name__ == "__main__":
 
     #input_kern = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=True)
     #kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern, W_rank=2)
-    input_kern1 = RBF(dataset_shape=(len(data1) + len(data2), data1.shape[1]), ARD=False)
-    input_kern2 = RBF(dataset_shape=(len(data1) + len(data2), data1.shape[1]), ARD=False)
-    kern = LCM(input_dim=data1.shape[1], num_outputs=2, kernels_list=[input_kern1, input_kern2], W_ranks=[2, 2])
+    input_kern1 = RBF(dataset_shape=(len(data1) + len(data2), data1.shape[1]), ARD=True)
+    input_kern2 = RBF(dataset_shape=(len(data1) + len(data2), data1.shape[1]), ARD=True)
+    kern = LCM(input_dim=data1.shape[1], num_outputs=2, kernels_list=[input_kern1, input_kern2], W_ranks=[2, 2],
+               time_constants=[0.5, 0.5])
 
     gp = GPCoregionalizedRegression(5, [data1, data2], [y1, y2], kernel=kern)
     likelihood = Likelihood(gp)

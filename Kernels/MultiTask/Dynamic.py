@@ -5,10 +5,10 @@ from jax import jit
 import jax.numpy as jnp
 
 
-def LCM(input_dim, num_outputs, kernels_list, W_ranks):
+def LCM(input_dim, num_outputs, kernels_list, W_ranks, time_constants):
     K = ICM(input_dim, num_outputs, kernels_list[0], W_ranks[0])
     for i in range(len(kernels_list[1:])):
-        K += ICM(input_dim, num_outputs, kernels_list[i], W_ranks[i])
+        K += ICM(input_dim, num_outputs, kernels_list[i], W_ranks[i], time_constants[i])
 
     return K
 
@@ -20,10 +20,10 @@ class ICM(VanillaKernel):
     for Expensive Black-Box Optimization
     in Dynamic Environment" - Renzhi Chen and Ke Li
     """
-    def __init__(self, input_dim, num_outputs, kernel, W_rank=1):
+    def __init__(self, input_dim, num_outputs, kernel, W_rank=1, time_const=1.):
         self.num_outputs = num_outputs
         self.kernel = kernel
-        self.icm = Dynamic(output_dim=num_outputs, rank=W_rank)
+        self.icm = Dynamic(output_dim=num_outputs, rank=W_rank, time=time_const)
         self.input_dim = input_dim
 
     @partial(jit, static_argnums=(0,))
