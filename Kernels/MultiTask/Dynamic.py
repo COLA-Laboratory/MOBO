@@ -1,5 +1,5 @@
 from Kernels.Kernel import VanillaKernel
-from Kernels.MultiTask.Coregionalize import Coregionalize
+from Kernels.MultiTask.Coregionalize import Dynamic
 from functools import partial
 from jax import jit
 import jax.numpy as jnp
@@ -14,10 +14,16 @@ def LCM(input_dim, num_outputs, kernels_list, W_ranks):
 
 
 class ICM(VanillaKernel):
+    """
+    Kernel Based from
+    "Transfer Bayesian Optimization
+    for Expensive Black-Box Optimization
+    in Dynamic Environment" - Renzhi Chen and Ke Li
+    """
     def __init__(self, input_dim, num_outputs, kernel, W_rank=1):
         self.num_outputs = num_outputs
         self.kernel = kernel
-        self.icm = Coregionalize(num_outputs, rank=W_rank)
+        self.icm = Dynamic(output_dim=num_outputs, rank=W_rank)
         self.input_dim = input_dim
 
     @partial(jit, static_argnums=(0,))

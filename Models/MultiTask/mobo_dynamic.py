@@ -8,7 +8,7 @@ from Models.JAX.GPregression import GPregression
 from ModelOptimizers.lbfgsb import lbfgsb
 from Likelihoods.JAX.chol import Likelihood
 
-from Kernels.MultiTask.CMS import ICM
+from Kernels.MultiTask.Dynamic import ICM
 from Models.MultiTask.GPCoregionalizedRegression import GPCoregionalizedRegression
 
 import GPy
@@ -26,8 +26,8 @@ if __name__ == "__main__":
 
     np.random.seed(0)
 
-    data1 = np.random.uniform(-5, 5, size=(10, 1))
-    data2 = np.random.uniform(-5, 5, size=(3, 1))
+    data1 = np.random.uniform(-5, 5, size=(30, 1))
+    data2 = np.random.uniform(-5, 5, size=(30, 1))
 
     y1 = np.array([sphere1(di) for di in data1]).reshape((-1, 1))
     y2 = np.array([sphere2(di) for di in data2]).reshape((-1, 1))
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     plt.plot(data2, y2, 'o')
     plt.title("MOBO")
     plt.show()
-
+    """
     k = GPy.kern.RBF(input_dim=data1.shape[1], ARD=True)
     icm = GPy.util.multioutput.ICM(input_dim=data1.shape[1], num_outputs=2, kernel=k, W_rank=2)
     m = GPy.models.GPCoregionalizedRegression([data1, data2], [y1, y2], kernel=icm)
@@ -103,4 +103,5 @@ if __name__ == "__main__":
     plt.plot(data2, y2, 'o')
     plt.title("Gpy")
     plt.show()
+    """
 

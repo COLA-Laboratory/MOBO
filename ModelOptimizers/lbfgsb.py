@@ -23,6 +23,7 @@ class lbfgsb:
     def value_and_gradient(self, x):
         p = self.to_dict(x)
         value, grad = self.function(p)
+        #print(grad)
         return value, np.concatenate([grad[pi] for pi in self.param_words])
 
     def opt(self):
