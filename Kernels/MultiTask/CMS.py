@@ -2,8 +2,6 @@ from Kernels.Kernel import VanillaKernel
 from Kernels.MultiTask.Coregionalize import Coregionalize
 from functools import partial
 from jax import jit
-import jax.numpy as jnp
-
 
 def LCM(input_dim, num_outputs, kernels_list, W_ranks):
     K = ICM(input_dim, num_outputs, kernels_list[0], W_ranks[0])
@@ -29,7 +27,6 @@ class ICM(VanillaKernel):
         kx *= self.icm.function(X[:, self.input_dim, None], params)
         return kx
 
-    @partial(jit, static_argnums=(0,))
     def cov(self, X, X2):
         kx = self.kernel.cov(X[:, :self.input_dim], X2[:, :self.input_dim])
         kx *= self.icm.cov(X[:, self.input_dim, None], X2[:, self.input_dim, None])

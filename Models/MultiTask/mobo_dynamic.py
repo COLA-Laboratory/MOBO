@@ -8,7 +8,7 @@ from Models.JAX.GPregression import GPregression
 from ModelOptimizers.lbfgsb import lbfgsb
 from Likelihoods.JAX.chol import Likelihood
 
-from Kernels.MultiTask.Dynamic import ICM
+from Kernels.MultiTask.Dynamic import ICM, LCM
 from Models.MultiTask.GPCoregionalizedRegression import GPCoregionalizedRegression
 
 import GPy
@@ -26,15 +26,17 @@ if __name__ == "__main__":
 
     np.random.seed(0)
 
-    data1 = np.random.uniform(-5, 5, size=(30, 1))
-    data2 = np.random.uniform(-5, 5, size=(30, 1))
+    data1 = np.random.uniform(-5, 5, size=(10, 1))
+    data2 = np.random.uniform(-5, 5, size=(3, 1))
 
     y1 = np.array([sphere1(di) for di in data1]).reshape((-1, 1))
     y2 = np.array([sphere2(di) for di in data2]).reshape((-1, 1))
 
-    input_kern = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=True)
-
-    kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern, W_rank=2)
+    #input_kern = RBF(dataset_shape=(len(data1)+len(data2), data1.shape[1]), ARD=True)
+    #kern = ICM(input_dim=data1.shape[1], num_outputs=2, kernel=input_kern, W_rank=2)
+    input_kern1 = RBF(dataset_shape=(len(data1) + len(data2), data1.shape[1]), ARD=False)
+    input_kern2 = RBF(dataset_shape=(len(data1) + len(data2), data1.shape[1]), ARD=False)
+    kern = LCM(input_dim=data1.shape[1], num_outputs=2, kernels_list=[input_kern1, input_kern2], W_ranks=[2, 2])
 
     gp = GPCoregionalizedRegression(5, [data1, data2], [y1, y2], kernel=kern)
     likelihood = Likelihood(gp)
