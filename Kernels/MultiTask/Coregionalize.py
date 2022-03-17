@@ -73,6 +73,7 @@ class Dynamic(VanillaKernel):
         self.parameters["kappa"+str(self.id)] = params["kappa"+str(self.id)]
         self.parameters["time"+str(self.id)] = params["time"+str(self.id)]
 
+
 class Coregionalize(VanillaKernel):
     """
     Covariance function for intrinsic/linear coregionalization models.

@@ -11,7 +11,6 @@ def ieuclidean_distance(X, diagonals):
     Xsq = jnp.sum(jnp.square(X), 1)
     r2 = -2. * jnp.dot(X, X.T) + (Xsq[:, None] + Xsq[None, :])
     r2 = r2 * diagonals
-    #r2 = jnp.clip(r2, 0, jnp.inf)
     return jnp.sqrt(r2)
 
 @jit
@@ -59,7 +58,7 @@ class RBF(VanillaKernel):
 
     @partial(jit, static_argnums=(0,))
     def NARDf(self, X, params):
-        r = ieuclidean_distance(X, self.diagonal) / params["lengthscale"+str(self.id)] ** 2
+        r = ieuclidean_distance(X, self.diagonal) ** 2 / params["lengthscale"+str(self.id)] ** 2
         return params["variance"+str(self.id)] * jnp.exp(-0.5 * r)
 
     @partial(jit, static_argnums=(0,))

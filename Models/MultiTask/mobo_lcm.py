@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from functools import reduce
 
-from Kernels.JAX.Matrixy.rbf import RBF
+from Kernels.JAX.Vectzy.rbf import RBF
 from Models.JAX.GPregression import GPregression
 from ModelOptimizers.lbfgsb import lbfgsb
 from Likelihoods.JAX.chol import Likelihood
@@ -26,8 +26,8 @@ if __name__ == "__main__":
 
     np.random.seed(0)
 
-    data1 = np.random.uniform(-5, 5, size=(8, 2))
-    data2 = np.random.uniform(-5, 5, size=(3, 2))
+    data1 = np.random.uniform(-5, 5, size=(8, 1))
+    data2 = np.random.uniform(-5, 5, size=(3, 1))
 
     y1 = np.array([sphere1(di) for di in data1]).reshape((-1, 1))
     y2 = np.array([sphere2(di) for di in data2]).reshape((-1, 1))
@@ -67,3 +67,4 @@ if __name__ == "__main__":
     plt.plot(data2, y2, 'o')
     plt.title("MOBO")
     plt.show()
+

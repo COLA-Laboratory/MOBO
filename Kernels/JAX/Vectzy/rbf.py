@@ -28,12 +28,18 @@ def ARDf(params, x, y, id):
 
 
 class RBF(VanillaKernel):
-    def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False):
+    def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False, active_dims=None):
         self.dataset_shape = dataset_shape
         self.id = 0
+        if active_dims is not None:
+            l = len(active_dims)
+            self.active_dims = jnp.arange(dataset_shape[1])
+        else:
+            l = dataset_shape[1]
+            self.active_dims = active_dims
         if ARD:
             self.parameters = {"variance"+str(self.id): jnp.ones((1,)) * variance * 1.,
-                               "lengthscale"+str(self.id): jnp.ones((dataset_shape[1],)) * lengthscale * 1.}
+                               "lengthscale"+str(self.id): jnp.ones((l,)) * lengthscale * 1.}
 
             self.rbf_kernel = ARDf
         else:
@@ -48,11 +54,11 @@ class RBF(VanillaKernel):
 
     @partial(jit, static_argnums=(0, ))
     def function(self, X, params):
-        return self.gram_matrix(params, X, X)
+        return self.gram_matrix(params, X[:, self.active_dims], X[:, self.active_dims])
 
     @partial(jit, static_argnums=(0, ))
     def cov(self, X, X2):
-        return self.gram_matrix(self.parameters, X, X2)
+        return self.gram_matrix(self.parameters, X[:, self.active_dims], X2[:, self.active_dims])
 
     @partial(jit, static_argnums=(0, ))
     def gram_matrix(self, params: Dict, x, y) -> jnp.ndarray:
