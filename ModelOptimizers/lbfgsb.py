@@ -1,11 +1,12 @@
 from scipy import optimize
 import numpy as np
+import jax.numpy as jnp
 
 
 class lbfgsb:
     def __init__(self, model, maxfun=1000):
         self.lengths = [len(model.parameters[pi]) for pi in model.parameters]
-        self.x0 = model.likelihood.finv(np.concatenate([model.parameters[pi] for pi in model.parameters]))
+        self.x0 = model.likelihood.finv(jnp.concatenate([model.parameters[pi] for pi in model.parameters]))
         self.param_words = list(model.parameters.keys())
         self.model = model
         self.function = model.likelihood.objective_and_grad
@@ -15,15 +16,15 @@ class lbfgsb:
         c_idx = 0
         p = {}
         for i in range(len(self.lengths)):
-            p[self.param_words[i]] = x[c_idx: c_idx+self.lengths[i]]
-            c_idx+=self.lengths[i]
+            p[self.param_words[i]] = x[c_idx: c_idx + self.lengths[i]]
+            c_idx += self.lengths[i]
 
         return p
 
     def value_and_gradient(self, x):
         p = self.to_dict(x)
         value, grad = self.function(p)
-        #print(grad)
+        # print(grad)
         return value, np.concatenate([grad[pi] for pi in self.param_words])
 
     def opt(self):
