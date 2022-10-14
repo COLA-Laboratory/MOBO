@@ -33,7 +33,8 @@ class RBF(VanillaKernel):
         self.id = 0
         if active_dims is not None:
             l = len(active_dims)
-            self.active_dims = jnp.arange(dataset_shape[1])
+            #self.active_dims = jnp.arange(dataset_shape[1])
+            self.active_dims = jnp.arange(l)
         else:
             l = dataset_shape[1]
             self.active_dims = active_dims

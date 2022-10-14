@@ -20,7 +20,7 @@ def rosebbrock(x):
 
 if __name__ == "__main__":
     np.random.seed(1)
-    dim = 50
+    dim = 10
     f = sphere
     X = np.random.uniform(-5, 5, (10, dim))
     y = np.array([f(xi) for xi in X]).reshape(-1, 1)
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     gpy_model = GPRegression(X, y, kernel=gpy_kern)
     gpy_model.optimize()
 
-    mobo_kern = RBF(ARD=False)
+    mobo_kern = RBF(input_dim=dim, ARD=False)
     mobo_model = moboGP(mobo_kern, X, y)
     mobo_likelihood = Likelihood(mobo_model)
     mobo_likelihood.evaluate()
