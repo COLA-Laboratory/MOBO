@@ -5,6 +5,7 @@ from typing import Dict
 from Kernels.Kernel import VanillaKernel
 config.update("jax_enable_x64", True)
 
+
 @jit
 def relu(x):
     return jnp.maximum(0, x)

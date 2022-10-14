@@ -27,6 +27,7 @@ def ARDf(params, x, y, id):
     return params["variance"+str(id)][0] * jnp.exp(-0.5 * r)
 
 
+
 class RBF(VanillaKernel):
     def __init__(self, dataset_shape, lengthscale=1., variance=1., ARD=False, active_dims=None):
         self.dataset_shape = dataset_shape
