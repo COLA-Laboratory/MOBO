@@ -29,6 +29,32 @@ class VanillaKernel:
         pass
 
 
+class Embedding(VanillaKernel):
+    def __init__(self, embedding, kernel):
+        self.embedding = embedding
+        self.kernel = kernel
+
+    @partial(jit, static_argnums=(0,))
+    def function(self, X, params):
+        r = self.kernel.function(self.embedding.function(X, params), params)
+        return r
+
+    @property
+    def parameters(self):
+        p = {}
+        p.update(self.kernel.parameters)
+        p.update(self.embedding.parameters)
+
+        return p
+
+    def set_parameters(self, params):
+        self.kernel.set_parameters(params)
+        self.embedding.set_parameters(params)
+
+    def cov(self, X, X2):
+        return self.kernel.cov(self.embedding.cov(X, X2))
+
+
 class Sum(VanillaKernel):
     def __init__(self, kernels):
         _newkerns = []
