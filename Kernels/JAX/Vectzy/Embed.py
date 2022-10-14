@@ -9,61 +9,33 @@ import numpy as np
 from jax import random
 
 
-@jit
-def relu(x):
-    return jnp.maximum(0, x)
-
 
 @jit
 def linear_kernel(x: np.ndarray, y: np.ndarray) -> np.ndarray:
-    """Linear kernel
-    .. math:: k_i = \sum_i^N x_i-y_i
-    Parameters
-    ----------
-    params : None
-        kept for compatibility
-    x : jax.numpy.ndarray
-        the inputs
-    y : jax.numpy.ndarray
-        the inputs
-    Returns
-    -------
-    kernel_mat : jax.numpy.ndarray
-        the kernel matrix (n_samples, n_samples)
-    """
     return np.sum(x * y)
 
 
-@partial(jit, static_argnums=(2, 3, 4, 5, 6, ))
-def predict(params, x, layer1_shape, layer2_shape, n_hidden, input_dims, id):
+@partial(jit, static_argnums=(2, 3, ))
+def predict(params, x, layer1_shape, id):
 
     w1 = params['w1%d' % id].reshape(layer1_shape)
-    b1 = params['b1%d' % id]#.reshape((n_hidden,))
-    w2 = params['w2%d' % id].reshape(layer2_shape)
-    b2 = params['b2%d' % id]#.reshape((input_dims,))
+    b1 = params['b1%d' % id]
 
     z1 = jnp.dot(w1, x) + b1
-    a1 = relu(z1)  # .block_until_ready()
-    z2 = jnp.dot(w2, a1) + b2
-    return z2
+    return z1
 
 
-class SingleLayer(VanillaKernel):
-    def __init__(self, dataset_shape, n_hidden, active_dims=None):
+class Linear(VanillaKernel):
+    def __init__(self, dataset_shape, embed_dim, active_dims=None):
         self.dataset_shape = dataset_shape
         self.input_dims = dataset_shape[1]
         self.id = 0
-        self.n_hidden = n_hidden
-        self.layer1_shape = (n_hidden, self.input_dims)
-        self.layer2_shape = (self.input_dims, n_hidden)
-
-        key = random.PRNGKey(0)
+        self.embed_dim = embed_dim
+        self.layer1_shape = (embed_dim, self.input_dims)
 
         self.parameters = {
             'w1%d' % self.id: jnp.ones((self.layer1_shape[0]*self.layer1_shape[1],)),
-            'b1%d' % self.id: jnp.ones((self.n_hidden,)),
-            'w2%d' % self.id: jnp.ones((self.layer2_shape[0]*self.layer2_shape[1],)),
-            'b2%d' % self.id: jnp.ones((self.input_dims,)),
+            'b1%d' % self.id: jnp.ones((embed_dim,)),
         }
 
         self.mapx1 = vmap(lambda x, y: linear_kernel(x, y), in_axes=(0, None), out_axes=0)
@@ -77,8 +49,6 @@ class SingleLayer(VanillaKernel):
     def change_id(self, new_id):
         self.parameters["w1" + str(new_id)] = self.parameters.pop("w1" + str(self.id))
         self.parameters["b1" + str(new_id)] = self.parameters.pop("b1" + str(self.id))
-        self.parameters["w2" + str(new_id)] = self.parameters.pop("w2" + str(self.id))
-        self.parameters["b2" + str(new_id)] = self.parameters.pop("b2" + str(self.id))
         self.id = new_id
 
     @partial(jit, static_argnums=(0,))
@@ -97,14 +67,11 @@ class SingleLayer(VanillaKernel):
         Given a function 'callable' with parameters 'params' we use jax.vmap to calculate
         the covariance matrix as the function is applied to each of the points.
         """
-        embed = vmap(lambda x: predict(params, x, self.layer1_shape, self.layer2_shape,
-                                       self.n_hidden, self.input_dims, self.id), in_axes=(0,))
+        embed = vmap(lambda x: predict(params, x, self.layer1_shape, self.id), in_axes=(0,))
         z1 = embed(x)
         z2 = embed(y)
         return self.mapx2(z1, z2)
 
     def set_parameters(self, params):
         self.parameters["w1" + str(self.id)] = params["w1" + str(self.id)]
-        self.parameters["w2" + str(self.id)] = params["w2" + str(self.id)]
         self.parameters["b1" + str(self.id)] = params["b1" + str(self.id)]
-        self.parameters["b2" + str(self.id)] = params["b2" + str(self.id)]
