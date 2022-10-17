@@ -7,19 +7,29 @@ from Kernels.Kernel import VanillaKernel
 config.update("jax_enable_x64", True)
 import numpy as np
 from jax import random
+from jax.numpy.linalg import norm
 
+@jit
+def seuclidean_distance(x, y) -> float:
+    return jnp.sum((x - y) ** 2)
 
+@jit
+def euclidean_distance(x, y) -> float:
+    return jnp.sqrt(seuclidean_distance(x, y))
 
 @jit
 def linear_kernel(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     return np.sum(x * y)
+    #return euclidean_distance(x, y)
 
 
 @partial(jit, static_argnums=(2, 3, ))
 def predict(params, x, layer1_shape, id):
 
     w1 = params['w1%d' % id].reshape(layer1_shape)
-    z1 = jnp.dot(w1, x)
+    b1 = params['b1%d' % id]
+
+    z1 = jnp.dot(w1, x) #+ b1
     return z1
 
 
@@ -33,6 +43,7 @@ class Linear(VanillaKernel):
 
         self.parameters = {
             'w1%d' % self.id: jnp.ones((self.layer1_shape[0]*self.layer1_shape[1],)),
+            'b1%d' % self.id: jnp.ones((embed_dim,)),
         }
 
         self.mapx1 = vmap(lambda x, y: linear_kernel(x, y), in_axes=(0, None), out_axes=0)
@@ -45,11 +56,14 @@ class Linear(VanillaKernel):
 
     def change_id(self, new_id):
         self.parameters["w1" + str(new_id)] = self.parameters.pop("w1" + str(self.id))
+        self.parameters["b1" + str(new_id)] = self.parameters.pop("b1" + str(self.id))
         self.id = new_id
 
     @partial(jit, static_argnums=(0,))
     def function(self, X, params):
         return self.gram_matrix(params, X[:, self.active_dims], X[:, self.active_dims])
+        #embed = vmap(lambda x: predict(params, x, self.layer1_shape, self.id), in_axes=(0,))
+        #return embed(X)
 
     @partial(jit, static_argnums=(0,))
     def cov(self, X, X2):
@@ -70,3 +84,4 @@ class Linear(VanillaKernel):
 
     def set_parameters(self, params):
         self.parameters["w1" + str(self.id)] = params["w1" + str(self.id)]
+        self.parameters["b1" + str(self.id)] = params["b1" + str(self.id)]
