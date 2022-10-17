@@ -19,9 +19,7 @@ def linear_kernel(x: np.ndarray, y: np.ndarray) -> np.ndarray:
 def predict(params, x, layer1_shape, id):
 
     w1 = params['w1%d' % id].reshape(layer1_shape)
-    b1 = params['b1%d' % id]
-
-    z1 = jnp.dot(w1, x) + b1
+    z1 = jnp.dot(w1, x)
     return z1
 
 
@@ -35,7 +33,6 @@ class Linear(VanillaKernel):
 
         self.parameters = {
             'w1%d' % self.id: jnp.ones((self.layer1_shape[0]*self.layer1_shape[1],)),
-            'b1%d' % self.id: jnp.ones((embed_dim,)),
         }
 
         self.mapx1 = vmap(lambda x, y: linear_kernel(x, y), in_axes=(0, None), out_axes=0)
@@ -48,7 +45,6 @@ class Linear(VanillaKernel):
 
     def change_id(self, new_id):
         self.parameters["w1" + str(new_id)] = self.parameters.pop("w1" + str(self.id))
-        self.parameters["b1" + str(new_id)] = self.parameters.pop("b1" + str(self.id))
         self.id = new_id
 
     @partial(jit, static_argnums=(0,))
@@ -74,4 +70,3 @@ class Linear(VanillaKernel):
 
     def set_parameters(self, params):
         self.parameters["w1" + str(self.id)] = params["w1" + str(self.id)]
-        self.parameters["b1" + str(self.id)] = params["b1" + str(self.id)]
